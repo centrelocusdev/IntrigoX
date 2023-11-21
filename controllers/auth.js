@@ -59,8 +59,9 @@ const register1 = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
     const name = req.body.name;
-    const myLanguage = req.body.language;
+    const myLanguage = req.body.myLanguage;
     const username = req.body.username;
+    
     if(!email || !name || !password  || !myLanguage || !username){
       throw new Error("Name, Email, Password my language and username are compulsory fields!");
     }
