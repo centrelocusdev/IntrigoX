@@ -26,6 +26,7 @@ const UserRegistrationSchema = new mongoose.Schema({
     required: [true, 'Please Provide Password'],
   },
   otp: String,
+  myLanguage: String
 })
 
 // UserSchema.methods.generateAuthToken= async function(){

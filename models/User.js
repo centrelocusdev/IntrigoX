@@ -27,7 +27,8 @@ const UserSchema = new mongoose.Schema({
   },
   token: String,
   otp: String,
-  level: String
+  level: String,
+  myLanguage: String,
 
 
 })
