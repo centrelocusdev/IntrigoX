@@ -1,6 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const mongoose = require("mongoose");
 const User = require("../models/User");
+const UserRegistration = require('../models/UserRegistration');
 const bcrypt = require("bcrypt");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
@@ -16,22 +17,114 @@ const generateOTP = () => {
   return OTP;
 };
 
-
 //get user by email
 const getUserByEmail = async(email)=> {
 const user = await User.findOne({email});
 return user;
 }
 
+// OTP send to the email id
+const otpSendToEmailId = async(subject , otp, email)=> {
+try{
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.NODEMAILER_EMAIL,
+      pass: process.env.NODEMAILER_PASSWORD
+    },
+    
+  });
+  var mailOptions = {
+    from: process.env.NODEMAILER_EMAIL,
+    to: email,
+    subject: subject,
+    text: `Here is the OTP ${otp}. Use this to reset password.`
+  };
+  
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+    } else {
+      return true;
+    }
+  });
+}catch(err){
+  console.log("Error" , err.message);
+}
+}
+
 // REGISTRATION
-const register = async (req, res) => {
+const register1 = async (req, res) => {
   try {
+    const email = req.body.email;
+    const password = req.body.password;
+    const name = req.body.name;
+    if(!email || !name || !password){
+      throw new Error("Name, Email and Password are compulsory fields!");
+    }
       // If account with received email id already exists so return error message.
-      const user = await User.findOne({ email: req.body.email });
+      const user = await User.findOne({ email });
       if (user) {
         throw new Error("User is already exist with the given email id!");
       }
-      const newUser = new User(req.body);
+
+      const userWithOtp = await UserRegistration ({email});
+      if(userWithOtp){
+        await UserRegistration.deleteOne({email});
+      }
+      // OTP Ceation
+      const otp =  generateOTP();
+      // Data saved to DB
+      const savedUser = new UserRegistration({
+        email,
+        password,
+        name,
+        otp: otp
+      })
+      await savedUser.save();
+
+      // OTP send to email id
+      const otpSent = otpSendToEmailId('Registration OTP' , otp , email);
+      if(!otpSent){
+        throw new Error("Something went wrong in otp sending to the email id.");
+      }
+     
+      res.status(200).json({
+        status: "success",
+        message: "Otp has been sent to the given email id!"
+      })
+    
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      message: err.message,
+    });
+  }
+};
+
+const register2 = async(req, res)=> {
+  const otp = req.body.otp;
+
+  const userData = await UserRegistration.findOne({
+    otp
+  })
+  if(!userData){
+    throw new Error('OTP Is not present in db!');
+  }
+  if(userData.otp !== otp){
+    throw new Error('Invalid OTP!');
+  }
+
+
+  const newUser = new User({
+    "email": userData.email,
+    "password": userData.password,
+    "name": userData.name,
+    "level": "beginner"
+  });
+
+  await UserRegistration.deleteOne({_id: userData.id});
+
       await newUser.generateAuthToken();
       await newUser.save();
       newUser.password = undefined;
@@ -40,12 +133,7 @@ const register = async (req, res) => {
         message: "Signup successful!",
         data: newUser,
       });
-  } catch (err) {
-    res.status(400).json({
-      message: err.message,
-    });
-  }
-};
+}
 
 // LOGIN
 const login = async (req, res) => {
@@ -86,31 +174,15 @@ const forgotPassword = async (req, res) => {
         otp: otp
       }
     })
-    var transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.NODEMAILER_EMAIL,
-        pass: process.env.NODEMAILER_PASSWORD
-      },
-      
-    });
-    var mailOptions = {
-      from: process.env.NODEMAILER_EMAIL,
-      to: email,
-      subject: 'Reset Password Link',
-      text: `Here is the OTP ${otp}. Use this to reset password.`
-    };
-    
-    transporter.sendMail(mailOptions, function(error, info){
-      if (error) {
-        console.log(error);
-      } else {
-        res.status(200).json({
-          status: 'success',
-          message: "OTP has been sent to email id!"
-        })
-      }
-    });
+    const res = otpSendToEmailId('Reset Password Link' , otp, email);
+    if(!res){
+      throw new Error("Something went wront in otp sending to the email id.");
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: "OTP has been sent to email id!"
+    })
 
 
   }catch(error){
@@ -174,4 +246,4 @@ const logout = async (req, res) => {
     res.status(400).json({status: 'error', message: err.message });
   }
 }
-module.exports = { register, login, forgotPassword, resetPassword , logout};
+module.exports = { register1,register2, login, forgotPassword, resetPassword , logout};
