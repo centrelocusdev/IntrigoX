@@ -20,6 +20,10 @@ const UserRegistrationSchema = new mongoose.Schema({
     ],
     unique: true,
   },
+  username: {
+    type: String,
+    required: [true, 'Please enter your username']
+  },
   password: {
     type: String,
     minLength: 6,
