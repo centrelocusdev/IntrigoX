@@ -122,7 +122,6 @@ const register2 = async(req, res)=> {
     level: 'beginner',
 
   });
-  console.log(newUser);
 
   await UserRegistration.deleteOne({_id: userData.id});
 
@@ -175,8 +174,8 @@ const forgotPassword = async (req, res) => {
         otp: otp
       }
     })
-    const res = otpSendToEmailId('Reset Password Link' , otp, email);
-    if(!res){
+    const sentOTP = otpSendToEmailId('Reset Password Link' , otp, email);
+    if(!sentOTP){
       throw new Error("Something went wront in otp sending to the email id.");
     }
 
@@ -202,8 +201,6 @@ const resetPassword = async (req, res) => {
       if(!user){
         throw new Error("User not found!")
       }
-      console.log(user.otp);
-      console.log(otp);
       // if otp is not valid
       if(user.otp != otp){
         throw new Error("OTP is invalid!")

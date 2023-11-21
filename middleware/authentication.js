@@ -3,6 +3,7 @@ const User = require('../models/User')
 require('dotenv').config()
 
 exports.auth = async (req, res, next) => {
+
    const token = req.body.token;
   try {
       const payload = jwt.verify(token, process.env.JWT_SECRET)

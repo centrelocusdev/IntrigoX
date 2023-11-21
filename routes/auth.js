@@ -2,6 +2,7 @@ const express= require('express')
 const router = express.Router()
 const {login, register1,forgotPassword,resetPassword,logout, register2} = require('../controllers/auth')
 const authentication = require('../middleware/authentication');
+console.log("in the AUTH router");
 
 router.post('/register1', register1)
 router.post('/register2', register2)
