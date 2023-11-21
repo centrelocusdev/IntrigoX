@@ -115,13 +115,14 @@ const register2 = async(req, res)=> {
     throw new Error('Invalid OTP!');
   }
 
-
   const newUser = new User({
-    "email": userData.email,
-    "password": userData.password,
-    "name": userData.name,
-    "level": "beginner"
+    email: userData.email,
+    password: userData.password,
+    name: userData.name,
+    level: 'beginner',
+
   });
+  console.log(newUser);
 
   await UserRegistration.deleteOne({_id: userData.id});
 
