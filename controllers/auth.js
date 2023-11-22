@@ -195,22 +195,44 @@ const forgotPassword = async (req, res) => {
   }
 };
 
+//OTP VERIFICATION OF FORGOT PASSWORD
+const otpVerification = async (req,res)=> {
+  try{
+    const otp = req.body.otp;
+  if(!otp){
+    throw new Error('Kindly provide an otp!');
+  }
+  const isUserPresent = await User.findOne({
+    otp: otp
+  })
+  if(!isUserPresent || !isUserPresent.otp || otp !== isUserPresent.otp){
+    throw new Error('otp is not matched with the sent otp! Send otp again.');
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: "OTP Verification successfully done."
+  })
+  }catch(err){
+    res.status(400).send({ status: "error", message: err.message });
+  }
+}
 // RESET PASSWORD
 const resetPassword = async (req, res) => {
-  const otp = req.body.otp;
     const newPassword = req.body.newPassword;
+    const confirmPassword = req.body.confirmPassword;
     const email = req.body.email;
+
     const user = await getUserByEmail(email);
     try{
       //if user is not valid
       if(!user){
         throw new Error("User not found!")
       }
-      // if otp is not valid
-      if(user.otp != otp){
-        throw new Error("OTP is invalid!")
+      if(newPassword !== confirmPassword){
+        throw new Error('Password mismatch!');
       }
-
+      
       const password = await bcrypt.hash(newPassword, 9);
       const result = await User.updateOne({_id: user._id} , {
         $set: {
@@ -249,4 +271,4 @@ const logout = async (req, res) => {
     res.status(400).json({status: 'error', message: err.message });
   }
 }
-module.exports = { register1,register2, login, forgotPassword, resetPassword , logout};
+module.exports = { register1,register2, otpVerification, login, forgotPassword, resetPassword , logout};
