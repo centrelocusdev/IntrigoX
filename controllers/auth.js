@@ -104,40 +104,44 @@ const register1 = async (req, res) => {
 };
 
 const register2 = async(req, res)=> {
-  const otp = req.body.otp;
-  if(!otp){
-    throw new Error('Kindly provide an otp!');
+  try{
+    const otp = req.body.otp;
+    if(!otp){
+      throw new Error('Kindly provide an otp!');
+    }
+  
+    const userData = await UserRegistration.findOne({
+      otp
+    })
+    if(!userData){
+      throw new Error('OTP Is not present in db!');
+    }
+    if(userData.otp !== otp){
+      throw new Error('Invalid OTP!');
+    }
+  
+    const newUser = new User({
+      username: userData.username,
+      email: userData.email,
+      password: userData.password,
+      myLanguage: userData.myLanguage,
+      level: 'Beginner',
+  
+    });
+  
+    await UserRegistration.deleteOne({_id: userData.id});
+  
+        await newUser.generateAuthToken();
+        await newUser.save();
+        newUser.password = undefined;
+        res.status(200).json({
+          status: "success",
+          message: "Signup successful!",
+          data: newUser,
+        });
+  }catch(err){
+    res.status(400).send({status: "error" , message: error.message});
   }
-
-  const userData = await UserRegistration.findOne({
-    otp
-  })
-  if(!userData){
-    throw new Error('OTP Is not present in db!');
-  }
-  if(userData.otp !== otp){
-    throw new Error('Invalid OTP!');
-  }
-
-  const newUser = new User({
-    username: userData.username,
-    email: userData.email,
-    password: userData.password,
-    myLanguage: userData.myLanguage,
-    level: 'Beginner',
-
-  });
-
-  await UserRegistration.deleteOne({_id: userData.id});
-
-      await newUser.generateAuthToken();
-      await newUser.save();
-      newUser.password = undefined;
-      res.status(200).json({
-        status: "success",
-        message: "Signup successful!",
-        data: newUser,
-      });
 }
 
 // LOGIN
