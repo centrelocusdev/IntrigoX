@@ -13,7 +13,7 @@ try{
         }
     })
 res.status(200).json({
-    status: 200,
+    status: "success",
     message: "Level has been updaed successfully!"
 })
 }catch(err){
