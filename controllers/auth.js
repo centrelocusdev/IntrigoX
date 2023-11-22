@@ -124,7 +124,7 @@ const register2 = async(req, res)=> {
     email: userData.email,
     password: userData.password,
     myLanguage: userData.myLanguage,
-    level: 'beginner',
+    level: 'Beginner',
 
   });
 
