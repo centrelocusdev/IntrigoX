@@ -4,13 +4,6 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 const UserRegistrationSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    minLength: 1,
-    maxLenght: 15,
-    trim: true,
-    required: [true, 'Please enter the name'],
-  },
   email: {
     type: String,
     required: [true, 'Please enter your email'],
