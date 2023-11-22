@@ -31,7 +31,7 @@ const UserRegistrationSchema = new mongoose.Schema({
   },
   otp: String,
   myLanguage: String
-})
+} , { timestamps: { createdAt: 'created_at' , updatedAt: 'updated_at'}})
 
 // UserSchema.methods.generateAuthToken= async function(){
 //   const token = jwt.sign({_id: this._id.toString()} , process.env.JWT_SECRET)

@@ -1,0 +1,49 @@
+{
+    "name": "Chapter 1",
+    "paragraphs": [
+        {
+            "type": "para",
+            "data": "Once upon a time, in the small town of Meadowville, there lived a curious little girl named Emma. Emma loved to explore the world around her, and every day after school, she would embark on a new adventure."
+        },
+        {
+            "type": "para",
+            "data": "One sunny afternoon, Emma decided to visit the magical Forest of Whispers. Legend had it that the forest was home to talking animals and hidden treasures. Emma, armed with her backpack and a sense of excitement, set off on the winding path that led to the heart of the forest."
+        },
+        {
+            "type": "assesment",
+            "data": {
+                "para": "As she entered the enchanted woods, the trees seemed to whisper secrets to her, and the leaves crunched beneath her feet like a sweet melody. Suddenly, Emma spotted a colorful bird perched on a branch. To her surprise, the bird spoke!",
+                "pronounciation-lesson-audio": "",
+                "questions": [
+                    "que1", "que2", "que3", "que4", "que5"
+                ]
+            }
+        },
+        {
+            "type": "para",
+            "data": "'Hello, young adventurer! I am Rainbow, the talking parrot. What brings you to our magical forest?' chirped Rainbow."
+        },
+        {
+            "type": "para",
+            "data": "'I'm here to discover the wonders of the Forest of Whispers,' replied Emma with a wide grin."
+        },
+        {
+            "type": "para",
+            "data": "Rainbow hopped onto Emma's shoulder, eager to be her guide. Together, they encountered a wise old owl named Oliver, a playful squirrel named Nutmeg, and a friendly rabbit named Cotton. Each creature shared stories and wisdom with Emma, teaching her about the importance of kindness, curiosity, and friendship."
+        },
+        {
+            "type": "assesment",
+            "data": {
+                "para": "As the sun began to set, casting a warm glow on the forest, Emma realized it was time to head home. Rainbow, Oliver, Nutmeg, and Cotton bid her farewell, promising to welcome her back anytime.",
+                "pronounciation-lesson-audio": "",
+                "questions": [
+                    "que1", "que2", "que3", "que4", "que5"
+                ]
+            }
+        },
+        {
+            "type": "para",
+            "data": "From that day forward, Emma visited the Forest of Whispers regularly, always learning something new and making lasting friendships with its magical inhabitants. And as she grew older, Emma never lost her sense of wonder and love for exploring the world around her."
+        }
+    ]
+}

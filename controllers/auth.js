@@ -58,12 +58,11 @@ const register1 = async (req, res) => {
   try {
     const email = req.body.email;
     const password = req.body.password;
-    const name = req.body.name;
     const myLanguage = req.body.myLanguage;
     const username = req.body.username;
     
-    if(!email || !name || !password  || !myLanguage || !username){
-      throw new Error("Name, Email, Password my language and username are compulsory fields!");
+    if(!email || !password  || !myLanguage || !username){
+      throw new Error("Email, Password my language and username are compulsory fields!");
     }
       // If account with received email id already exists so return error message.
       const user = await User.findOne({ email });
@@ -79,7 +78,6 @@ const register1 = async (req, res) => {
       const otp =  generateOTP();
       // Data saved to DB
       const savedUser = new UserRegistration({
-        name,
         username,
         email,
         password,
@@ -121,7 +119,6 @@ const register2 = async(req, res)=> {
   }
 
   const newUser = new User({
-    name: userData.name,
     username: userData.username,
     email: userData.email,
     password: userData.password,

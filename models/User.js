@@ -4,15 +4,11 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 const UserSchema = new mongoose.Schema({
-  name: {
+  username: {
     type: String,
     minLength: 1,
     maxLenght: 15,
     trim: true,
-    required: [true, 'Please enter the name'],
-  },
-  username: {
-    type: String,
     required: [true, 'Please enter your username']
   },
   email: {
@@ -33,9 +29,10 @@ const UserSchema = new mongoose.Schema({
   otp: String,
   level: String,
   myLanguage: String,
+  cummulativeScore: Number,
+  currentScore: Number
 
-
-})
+}, { timestamps: { createdAt: 'created_at' , updatedAt: 'updated_at' }})
 
 UserSchema.methods.generateAuthToken= async function(){
   const token = jwt.sign({_id: this._id.toString()} , process.env.JWT_SECRET)
