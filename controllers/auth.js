@@ -114,7 +114,7 @@ const register2 = async(req, res)=> {
       otp
     })
     if(!userData){
-      throw new Error('OTP Is not present in db!');
+      throw new Error('OTP mismatch!');
     }
     if(userData.otp !== otp){
       throw new Error('Invalid OTP!');
