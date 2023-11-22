@@ -9,7 +9,8 @@ const nodemailer = require("nodemailer");
 const otpGenerator = require("otp-generator");
 
 const OTP_CONFIG= {
-  upperCaseAlphabets: true,
+  upperCaseAlphabets: false,
+  lowerCaseAlphabets: false,
   specialChars: false,
 }
 const generateOTP = () => {
