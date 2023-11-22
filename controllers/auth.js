@@ -39,16 +39,10 @@ try{
     from: process.env.NODEMAILER_EMAIL,
     to: email,
     subject: subject,
-    text: `Here is the OTP ${otp}. Use this to reset password.`
+    text: `Here is the OTP ${otp}.`
   };
-  
-  transporter.sendMail(mailOptions, function(error, info){
-    if (error) {
-      console.log(error);
-    } else {
-      return true;
-    }
-  });
+  return {transporter, mailOptions};
+ 
 }catch(err){
   console.log("Error" , err.message);
 }
@@ -78,7 +72,7 @@ const register1 = async (req, res) => {
       // OTP Ceation
       const otp =  generateOTP();
       // Data saved to DB
-      const savedUser = new UserRegistration({
+      const savedUser =  new UserRegistration({
         username,
         email,
         password,
@@ -88,16 +82,19 @@ const register1 = async (req, res) => {
       await savedUser.save();
 
       // OTP send to email id
-      const otpSent = otpSendToEmailId('Registration OTP' , otp , email);
-      if(!otpSent){
-        throw new Error("Something went wrong in otp sending to the email id.");
-      }
-     
-      res.status(200).json({
-        status: "success",
-        message: "Otp has been sent to the given email id!"
-      })
-    
+      const mailData = await otpSendToEmailId('Registration OTP' , otp , email);
+
+      mailData.transporter.sendMail(mailData.mailOptions, async function(error, info){
+        if (error) {
+          console.log(error);
+          throw new Error("Something went wrong in otp sending to the email id.");
+        } else {
+          res.status(200).json({
+            status: "success",
+            message: "Otp has been sent to the given email id!"
+          })
+        }
+      });
   } catch (err) {
     console.log(err);
     res.status(400).json({
@@ -179,15 +176,18 @@ const forgotPassword = async (req, res) => {
         otp: otp
       }
     })
-    const sentOTP = otpSendToEmailId('Reset Password Link' , otp, email);
-    if(!sentOTP){
-      throw new Error("Something went wront in otp sending to the email id.");
-    }
-
-    res.status(200).json({
-      status: 'success',
-      message: "OTP has been sent to email id!"
-    })
+    const mailData = await otpSendToEmailId('Reset Password Link' , otp, email);
+    mailData.transporter.sendMail(mailData.mailOptions, async function(error, info){
+      if (error) {
+        console.log(error);
+        throw new Error("Something went wrong in otp sending to the email id.");
+      } else {
+        res.status(200).json({
+          status: "success",
+          message: "Otp has been sent to the given email id!"
+        })
+      }
+    });
 
 
   }catch(error){
