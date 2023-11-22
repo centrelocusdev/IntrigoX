@@ -140,7 +140,7 @@ const register2 = async(req, res)=> {
           data: newUser,
         });
   }catch(err){
-    res.status(400).send({status: "error" , message: error.message});
+    res.status(400).send({status: "error" , message: err.message});
   }
 }
 
