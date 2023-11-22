@@ -2,7 +2,7 @@ const { StatusCodes } = require("http-status-codes");
 const mongoose = require("mongoose");
 const User = require("../models/User");
 const UserRegistration = require('../models/UserRegistration');
-const bcrypt = require("bcrypt");
+var bcrypt = require('bcryptjs')
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
@@ -47,6 +47,23 @@ try{
   console.log("Error" , err.message);
 }
 }
+// Hash the password
+const generateHashedPassword = async (password) => {
+  console.log(password);
+try{
+  const saltRounds = 10;
+    const hashedPassword = await new Promise((resolve, reject) => {
+      bcrypt.hash(password, saltRounds, function(err, hash) {
+        if (err) reject(err)
+        resolve(hash)
+      });
+    })
+  
+    return hashedPassword
+}catch(err){
+  console.log(err.message)
+}
+}
 
 // REGISTRATION
 const register1 = async (req, res) => {
@@ -72,10 +89,13 @@ const register1 = async (req, res) => {
       // OTP Ceation
       const otp =  generateOTP();
       // Data saved to DB
+      const hashedPassword = await generateHashedPassword(password);
+      console.log(hashedPassword);
+      
       const savedUser =  new UserRegistration({
         username,
         email,
-        password,
+        password: hashedPassword,
         myLanguage,
         otp: otp
       })
@@ -148,19 +168,22 @@ const register2 = async(req, res)=> {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    if(!email || !password){
+      throw new Error("kindly provide email and pasword")
+    }
     const user = await User.findOne({ email });
     if (!user) throw new Error("User not found, please sign up first!")
     console.log(password, user.password);
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log(isMatch);
+
     if (!isMatch) throw new Error("Incorrect Password, Please write correct password");
-    else {
     
       await user.generateAuthToken();
       await user.save();
       req.user = user;
       user.password = "";
       res.status(200).send({ status: "success", data: user, message: "Login successful!"});
-    }
   } catch (err) {
     res.status(400).send({ status: "error", message: err.message });
   }

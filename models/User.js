@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
@@ -41,16 +40,16 @@ UserSchema.methods.generateAuthToken= async function(){
   return token;
 }
 
-UserSchema.pre('save', async function(next){
-  try{
-    if(this.isModified('password')){
-      this.password = await bcrypt.hash(this.password, 9);
-    }
-    next();
-  }catch(err){
-    console.log("Error in password matching" , err);
-  }
-})
+// UserSchema.pre('save', async function(next){
+//   try{
+//     if(this.isModified('password')){
+//       this.password = await bcrypt.hash(this.password, 9);
+//     }
+//     next();
+//   }catch(err){
+//     console.log("Error in password matching" , err);
+//   }
+// })
 module.exports = mongoose.model('User' , UserSchema);
 
 

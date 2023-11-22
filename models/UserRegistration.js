@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
@@ -33,16 +32,16 @@ const UserRegistrationSchema = new mongoose.Schema({
 //   return token;
 // }
 
-UserRegistrationSchema.pre('save', async function(next){
-  try{
-    if(this.isModified('password')){
-      this.password = await bcrypt.hash(this.password, 9);
-    }
-    next();
-  }catch(err){
-    console.log("Error in password matching" , err);
-  }
-})
+// UserRegistrationSchema.pre('save', async function(next){
+//   try{
+//     if(this.isModified('password')){
+//       this.password = await bcrypt.hash(this.password, 9);
+//     }
+//     next();
+//   }catch(err){
+//     console.log("Error in password matching" , err);
+//   }
+// })
 module.exports = mongoose.model('UserRegistration' , UserRegistrationSchema);
 
 
