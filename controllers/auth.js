@@ -105,6 +105,9 @@ const register1 = async (req, res) => {
 
 const register2 = async(req, res)=> {
   const otp = req.body.otp;
+  if(!otp){
+    throw new Error('Kindly provide an otp!');
+  }
 
   const userData = await UserRegistration.findOne({
     otp
@@ -143,7 +146,7 @@ const login = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) throw new Error("User not found, please sign up first!")
-    
+    console.log(password, user.password);
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new Error("Incorrect Password, Please write correct password");
     else {
