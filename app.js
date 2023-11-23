@@ -5,6 +5,7 @@ const app = express()
 const authRouter = require('./routes/auth')
 const userRouter = require('./routes/users');
 const cors = require('cors')
+const path = require('path');
 
 // app.use((_req, res, next) => {
 //   res.header('Access-Control-Allow-Origin', '*');
@@ -26,12 +27,14 @@ const cors = require('cors')
 
 app.use(express.json())
 app.use(express.static('public/audio'));
+app.use(express.static('public/image'));
 // routes
 app.get('/', (req, res) => {
   res.send(
     '<h1> Task-Manager API</h1> <a href=""> Source Code</a>'
   )
 })
+
 
 // routes
 app.use('/api/v1/auth', authRouter)
@@ -51,4 +54,5 @@ const start = async () => {
 }
 
 start()
+
 

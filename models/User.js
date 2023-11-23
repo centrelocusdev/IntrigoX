@@ -2,6 +2,8 @@ const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
+
+
 const UserSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -29,7 +31,10 @@ const UserSchema = new mongoose.Schema({
   level: String,
   myLanguage: String,
   cummulativeScore: Number,
-  currentScore: Number
+  currentScore: Number,
+  avatar:{
+    type: String,
+},
 
 }, { timestamps: { createdAt: 'created_at' , updatedAt: 'updated_at' }})
 
@@ -50,6 +55,10 @@ UserSchema.methods.generateAuthToken= async function(){
 //     console.log("Error in password matching" , err);
 //   }
 // })
+
+
+
+
 module.exports = mongoose.model('User' , UserSchema);
 
 
