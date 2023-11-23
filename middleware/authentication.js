@@ -3,8 +3,15 @@ const User = require('../models/User')
 require('dotenv').config()
 
 exports.auth = async (req, res, next) => {
-
-   const token = req.body.token;
+  let  token;
+    if(req.body && req.body.token){
+     token = req.body.token;
+  }else if(req.headers && req.headers.authorization ){
+    token = req.headers.authorization;
+  }
+  if(!token){
+    throw new Error("Verification failed!");
+  }
   try {
       const payload = jwt.verify(token, process.env.JWT_SECRET)
       const user = await User.findById({_id: payload._id});
