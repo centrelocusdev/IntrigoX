@@ -30,8 +30,14 @@ const UserSchema = new mongoose.Schema({
   otp: String,
   level: String,
   myLanguage: String,
-  cummulativeScore: Number,
-  currentScore: Number,
+  cummulativeScore: {
+    type:Number,
+    default: 0
+  },
+  currentScore:  {
+    type:Number,
+    default: 0
+  },
   avatar:{
     type: String,
 },
