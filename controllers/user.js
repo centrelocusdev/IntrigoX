@@ -2,6 +2,7 @@ const User = require("../models/User");
 const fs = require("fs");
 const path = require("path");
 const AVATAR_PATH = path.join("/public/image");
+const AWS = require('aws-sdk');
 
 const updateUserLevel = async (req, res) => {
   try {
@@ -26,6 +27,14 @@ const updateUserLevel = async (req, res) => {
     res.status(400).send({ status: "error", message: err.message });
   }
 };
+
+const s3 = new AWS.S3({
+  credentials: {
+      accessKeyId: process.env.ACCESS_KEY,
+      secretAccessKey: process.env.SECRET_ACCESS_KEY
+  },
+  region: process.env.REGION
+})
 
 const updateUserProfilePicture = async (req, res) => {
   const user = req.user;
@@ -63,6 +72,40 @@ const updateUserProfilePicture = async (req, res) => {
     res.status(400).send({ status: "error", message: err.message });
   }
 };
+const updateUserProfileWithS3 = async(req,res)=> {
+  try{
+    // console.log(req.file);
+    const user = req.user;
+    if(!user){
+      throw new Error("Authorization failed!");
+    }
+
+    if(!req.file.originalname){
+      throw new Error('file is not present');
+    }
+
+  const updatedUser = await User.updateOne(
+    { _id: user.id },
+    {
+      $set: {
+        avatar: req.file.originalname
+      },
+    }
+  );
+
+  // console.log(req.files);
+  
+    res.status(200).json({
+      status: "success",
+      message: "Image has been updated successfully!"
+    })
+
+  }catch (err) {
+    res.status(400).send({ status: "error", message: err.message });
+  }
+}
+
+
 
 const userData = async (req, res)=> {
     try{
@@ -70,14 +113,26 @@ const userData = async (req, res)=> {
         if (!user) {
             throw new Error("Authrization failed!");
           }
-          res.status(200).json({
-            status: "success",
-            data: user
-          });
+          let output;
+          s3.listObjects({Bucket: process.env.BUCKET_NAME})
+          .promise()
+          .then(data => {
+            let baseurl = 'https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/'
+            output = data.Contents.filter(e => {return e.Key === user.avatar}).map(e=> baseurl + e.Key);
+            if(output.length<=0){
+              throw new Error("Image not found!");
+            }
+            res.status(200).json({
+              status: "success",
+              data: user,
+              image: output
+            });        
+            })
+         
 
     }catch (err) {
     res.status(400).send({ status: "error", message: err.message });
   }
 }
 
-module.exports = { updateUserLevel, updateUserProfilePicture, userData };
+module.exports = { updateUserLevel, updateUserProfilePicture, userData , updateUserProfileWithS3 };

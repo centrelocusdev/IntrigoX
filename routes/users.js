@@ -34,6 +34,6 @@ const storageEngine = multer.diskStorage({
   })
 
 router.post('/updateUserLevel',authentication.auth, updateUserLevel );
-router.post('/updateProfilePicture' ,authentication.auth, upload.single('image'), updateUserProfilePicture );
+// router.post('/updateProfilePicture' ,authentication.auth, upload.single('image'), updateUserProfilePicture );
 router.get('/userData', authentication.auth, userData )
 module.exports = router;

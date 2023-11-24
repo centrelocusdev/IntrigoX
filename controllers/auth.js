@@ -49,7 +49,6 @@ try{
 }
 // Hash the password
 const generateHashedPassword = async (password) => {
-  console.log(password);
 try{
   const saltRounds = 10;
     const hashedPassword = await new Promise((resolve, reject) => {
@@ -90,7 +89,6 @@ const register1 = async (req, res) => {
       const otp =  generateOTP();
       // Data saved to DB
       const hashedPassword = await generateHashedPassword(password);
-      console.log(hashedPassword);
       
       const savedUser =  new UserRegistration({
         username,
@@ -173,9 +171,7 @@ const login = async (req, res) => {
     }
     const user = await User.findOne({ email });
     if (!user) throw new Error("User not found, please sign up first!")
-    console.log(password, user.password);
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log(isMatch);
 
     if (!isMatch) throw new Error("Incorrect Password, Please write correct password");
     
