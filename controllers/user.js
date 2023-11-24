@@ -42,7 +42,7 @@ const updateUserProfilePicture = async (req, res) => {
         // console.log("in the user.avatar");
         // console.log(__dirname);
         // console.log(path.join(__dirname ,'..', '/public/image' , user.avatar));
-        fs.unlinkSync(`./public/image/${user.avatar}`);
+        fs.unlinkSync(path.join(__dirname, '..' ,`/public/image/${user.avatar}`));
       }
 
       const updatedUser = await User.updateOne(

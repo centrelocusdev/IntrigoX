@@ -8,10 +8,10 @@ const AVATAR_PATH = path.join('/public/image');
 
 const storageEngine = multer.diskStorage({
     destination:(req, file, cb)=> {
-        cb(null, './public/image')
+        cb(null,  path.join(__dirname, '..' ,'/public/image'))
     },
     filename: (req, file, cb) => {
-      cb(null, `${Date.now()}--${file.originalname.trim()}`);
+      cb(null, `${Date.now()}--${file.originalname}`);
     }
   })
   const checkFileType = (file, cb)=> {
