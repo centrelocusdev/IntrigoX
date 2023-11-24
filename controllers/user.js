@@ -114,7 +114,7 @@ const userData = async (req, res)=> {
             throw new Error("Authrization failed!");
           }
           let output;
-          s3.listObjects({Bucket: process.env.BUCKET_NAME})
+          s3.listObjects({Bucket: process.env.BUCKET_PROFILE_PICTURE})
           .promise()
           .then(data => {
             let baseurl = 'https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/'
