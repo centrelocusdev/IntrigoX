@@ -8,7 +8,7 @@ const AVATAR_PATH = path.join('/public/image');
 
 const storageEngine = multer.diskStorage({
     destination:(req, file, cb)=> {
-        cb(null, path.join(__dirname, '..' , AVATAR_PATH))
+        cb(null, './public/image')
     },
     filename: (req, file, cb) => {
       cb(null, `${Date.now()}--${file.originalname.trim()}`);

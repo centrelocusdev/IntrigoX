@@ -301,4 +301,29 @@ const logout = async (req, res) => {
     res.status(400).json({status: 'error', message: err.message });
   }
 }
-module.exports = { register1,register2, otpVerification, login, forgotPassword, resetPassword , logout};
+const googleAuth =  async (req, res) => {
+try{
+  const serverAuthCode =  req.serverAuthCode;
+const accessToken = req.accessToken;
+if(!serverAuthCode || !accessToken){
+  throw new Error("kindly provide the valid info!");
+}
+await axios({
+  method: 'get',
+  url: 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + accessToken,
+  withCredentials: true
+})
+  .then(function (response) {
+      console.log('response==>', response.data);
+      // flag = true;
+      // id = response.data.kid
+  })
+  .catch(function (response) {
+      console.log('error');
+  });
+} catch (err) {
+  res.status(400).json({status: 'error', message: err.message });
+}
+
+}
+module.exports = { register1,register2, otpVerification, login, forgotPassword, resetPassword , logout , googleAuth};
