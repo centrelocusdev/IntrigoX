@@ -1,6 +1,6 @@
 const express= require('express')
 const router = express.Router();
-const  {updateUserLevel, updateUserProfilePicture , userData} = require("../controllers/user");
+const  {updateUserLevel, updateUserProfilePicture , userData } = require("../controllers/user");
 const authentication = require('../middleware/authentication');
 const multer = require("multer");
 const path  = require('path');

@@ -1,6 +1,6 @@
 const express= require('express')
 const router = express.Router();
-const  {updateUserLevel, updateUserProfilePicture , userData , updateUserProfileWithS3} = require("../controllers/user");
+const  {updateUserLevel, updateUserProfilePicture , userData , updateUserProfileWithS3 , updateCumulativeScoreOrCurrentRunningScore} = require("../controllers/user");
 const authentication = require('../middleware/authentication');
 const path  = require('path');
 const multer = require('multer');
@@ -32,4 +32,5 @@ const uploadWithMulter = multer({
 router.post('/updateUserLevel',authentication.auth, updateUserLevel );
 router.post('/updateProfilePicture' ,authentication.auth, uploadWithMulter.single("image"), updateUserProfileWithS3 );
 router.get('/userData', authentication.auth, userData )
+router.post('/updateScore' , authentication.auth, updateCumulativeScoreOrCurrentRunningScore);
 module.exports = router;

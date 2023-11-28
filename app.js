@@ -5,6 +5,7 @@ const app = express()
 const authRouter = require('./routes/auth')
 const userRouter = require('./routes/users');
 const userS3Router = require('./routes/usersS3');
+const journeyRouter = require('./routes/journey');
 const cors = require('cors')
 const path = require('path');
 
@@ -42,6 +43,7 @@ app.get('/', (req, res) => {
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/user' , userRouter)
 app.use('/api/v1/users3' , userS3Router);
+app.use('/api/v1/journey' , journeyRouter);
 
 // app.use('/api/v1/tasks', authenticateUser, tasksRouter)
 

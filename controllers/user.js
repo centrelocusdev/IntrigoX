@@ -135,4 +135,48 @@ const userData = async (req, res)=> {
   }
 }
 
-module.exports = { updateUserLevel, updateUserProfilePicture, userData , updateUserProfileWithS3 };
+const updateCumulativeScoreOrCurrentRunningScore = async (req, res)=> {
+  try{
+    const getCummulativeScore = req.body.cummulativeScore;
+    const getCurrentRunningScore = req.body.currentRunningScore;
+    const user = req.user;
+
+    if(!user){
+      throw new Erro('Authorization failed!');
+    }
+
+    if((getCummulativeScore === undefined || getCummulativeScore === null) && (getCurrentRunningScore === undefined || getCurrentRunningScore === null)){
+      throw new Error('kindly provide any of 2 scores!');
+    }
+    if(getCummulativeScore || getCummulativeScore === 0){
+      const updatedUser = await User.updateOne({_id: user._id} , {
+        $set: {
+          cummulativeScore: getCummulativeScore
+        }
+      })
+    }
+
+    if(getCurrentRunningScore || getCurrentRunningScore === 0){
+      const updatedUser = await User.updateOne({_id: user._id} , {
+        $set: {
+          currentScore: getCurrentRunningScore
+        }
+      })
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Score has been updated!"
+    })
+
+    
+
+  }catch(err){
+    res.status(400).json({
+      status: "Error",
+      message: err.message
+    })
+  }
+}
+
+module.exports = { updateUserLevel, updateUserProfilePicture, userData , updateUserProfileWithS3 , updateCumulativeScoreOrCurrentRunningScore };
