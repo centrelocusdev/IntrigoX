@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const AVATAR_PATH = path.join("/public/image");
 const AWS = require('aws-sdk');
+const Bonus = require("../models/bonus");
 
 const updateUserLevel = async (req, res) => {
   try {
@@ -146,8 +147,10 @@ const updateCumulativeScoreOrCurrentRunningScore = async (req, res)=> {
     }
 
     if((getCummulativeScore === undefined || getCummulativeScore === null) && (getCurrentRunningScore === undefined || getCurrentRunningScore === null)){
-      throw new Error('kindly provide any of 2 scores!');
+      throw new Error('kindly provide any of the 2 scores!');
     }
+
+    // Updatign Cummulative Score
     if(getCummulativeScore || getCummulativeScore === 0){
       const updatedUser = await User.updateOne({_id: user._id} , {
         $set: {
@@ -156,12 +159,38 @@ const updateCumulativeScoreOrCurrentRunningScore = async (req, res)=> {
       })
     }
 
+    // Update Current RunningScore
     if(getCurrentRunningScore || getCurrentRunningScore === 0){
       const updatedUser = await User.updateOne({_id: user._id} , {
         $set: {
           currentScore: getCurrentRunningScore
         }
       })
+    }
+
+    // Check if the score of the user is valid for any new bonus if yes so add that bonus in user db
+    const newUser = await User.findById({_id: user._id});
+    const userCummulativeScore = newUser.cummulativeScore;
+
+    const bonuses = await Bonus.find({});
+
+    let validBonuses = bonuses.filter((bonus) => {
+      return userCummulativeScore >= bonus.targetScore
+    }).map((item) => {
+      return item.bonus
+    })
+
+    for(let i = 0;i<validBonuses.length;i++){
+      let isBonusPresent = false;
+      for(let j = 0;j<newUser.bonuses.length;j++){
+        if(validBonuses[i] === newUser.bonuses[j]){
+          isBonusPresent = true;
+        }
+      }
+      if(!isBonusPresent){
+        newUser.bonuses.push(validBonuses[i]);
+        await newUser.save();
+      }
     }
 
     res.status(200).json({

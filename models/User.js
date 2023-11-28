@@ -42,6 +42,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: 'default.png'
 },
+bonuses: []
 
 }, { timestamps: { createdAt: 'created_at' , updatedAt: 'updated_at' }})
 
