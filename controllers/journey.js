@@ -13,6 +13,8 @@ const {
   Question1Data,
   Question2Data,
   ObstacleQuestionsData,
+  flashCardsData
+ 
 } = require("../data");
 const util = require("util");
 
@@ -82,6 +84,10 @@ exports.storeChaptersData = async (req, res) => {
       if (NewParagraph.type === "assesment") {
         NewParagraph.questions.push(Question1);
         NewParagraph.questions.push(Question2);
+
+        for(let j =0; j<flashCardsData.length;j++){
+          NewParagraph.flashcards.push(flashCardsData[j]);
+        }
       }
 
       if (NewParagraph.type === "obstacle") {
@@ -100,7 +106,7 @@ exports.storeChaptersData = async (req, res) => {
       newChapter.paragraphs.push(CollectionOfNewPara[i]);
     }
     await newChapter.save();
-    console.log(newChapter);
+    // console.log(newChapter);
     res.send("success");
   } catch (err) {
     res.send(err.message);
