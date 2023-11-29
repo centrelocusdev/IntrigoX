@@ -55,8 +55,6 @@ exports.getChaptersData = async (req, res) => {
       compact: false,
       colors: true,
     });
-    console.log(newChapter[0]);
-    console.log(newChapter.length);
     res.send(getChapter);
   } catch (err) {
     res.status(400).json({ status: "Error", message: err.message });
@@ -80,7 +78,6 @@ exports.storeChaptersData = async (req, res) => {
     let NewParagraph;
     for (let i = 0; i < ParagraphsData.length; i++) {
       NewParagraph = new Paragraph(ParagraphsData[i]);
-      console.log(NewParagraph.type);
       if (NewParagraph.type === "assesment") {
         NewParagraph.questions.push(Question1);
         NewParagraph.questions.push(Question2);
@@ -98,7 +95,6 @@ exports.storeChaptersData = async (req, res) => {
       await NewParagraph.save();
       CollectionOfNewPara.push(NewParagraph);
     }
-    console.log(NewParagraph);
     const newChapter = new Chapter(chapterData);
     await newChapter.save();
 
