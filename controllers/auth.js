@@ -1,13 +1,18 @@
 const { StatusCodes } = require("http-status-codes");
 const mongoose = require("mongoose");
 const User = require("../models/User");
+const GoogleUser = require('../models/GoogleUser');
+const FacebookUser = require('../models/FacebookUser');
 const UserRegistration = require("../models/UserRegistration");
 var bcrypt = require("bcryptjs");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const otpGenerator = require("otp-generator");
-const axios = require('axios');
+const axios = require("axios");
+const { OAuth2Client } = require("google-auth-library");
+const fetch = require("node-fetch");
+
 const OTP_CONFIG = {
   upperCaseAlphabets: false,
   lowerCaseAlphabets: false,
@@ -315,30 +320,102 @@ const logout = async (req, res) => {
 };
 const googleAuth = async (req, res) => {
   try {
-    const serverAuthCode = req.body.serverAuthCode;
-    const accessToken = req.body.accessToken;
-    // console.log(serverAuthCode, accessToken);
-
-    if (!serverAuthCode || !accessToken) {
-      throw new Error("kindly provide the valid info!");
+    const email = req.body.email;
+    if (!email) {
+      throw new Error("Email is compulsory!");
     }
-    await axios({
-      method: "get",
-      url:
-     ` https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${accessToken}`,
-      withCredentials: true,
-      "Content-Type":"application/json"
-    })
-      .then(function (response) {
-        console.log("in the response");
-        console.log("response==>", response.data);
-        // flag = true;
-        // id = response.data.kid
-      })
-      .catch(function (error) {
-        console.log("error" , error);
+    const isUserExist = await GoogleUser.findOne({ email: email });
+
+    if (isUserExist) {
+      // write login logic
+      await isUserExist.generateAuthToken();
+      await isUserExist.save();
+      // req.user = user;
+      isUserExist.password = "";
+      res
+        .status(200)
+        .send({
+          status: "success",
+          data: isUserExist,
+          message: "Login successful!",
+        });
+    } else {
+      // write signup logic
+
+      const username = req.body.username;
+      const myLanguage = req.body.myLanguage;
+
+      if (!username || !email || !myLanguage) {
+        throw new Error("Username, email, mylanguage fields are compulsory!");
+      }
+
+      const newUser = new GoogleUser({
+        username,
+        email,
+        myLanguage,
+        level: "Beginner",
       });
-      res.send("success");
+
+      await newUser.generateAuthToken();
+      await newUser.save();
+      newUser.password = undefined;
+      res.status(200).json({
+        status: "success",
+        message: "Signup successful!",
+        data: newUser,
+      });
+    }
+  } catch (err) {
+    res.status(400).json({ status: "error", message: err.message });
+  }
+};
+const facebookAuth = async (req, res) => {
+  try {
+    const email = req.body.email;
+    if (!email) {
+      throw new Error("Email is compulsory!");
+    }
+    const isUserExist = await FacebookUser.findOne({ email: email });
+
+    if (isUserExist) {
+      // write login logic
+      await isUserExist.generateAuthToken();
+      await isUserExist.save();
+      // req.user = user;
+      isUserExist.password = "";
+      res
+        .status(200)
+        .send({
+          status: "success",
+          data: isUserExist,
+          message: "Login successful!",
+        });
+    } else {
+      // write signup logic
+
+      const username = req.body.username;
+      const myLanguage = req.body.myLanguage;
+
+      if (!username || !email || !myLanguage) {
+        throw new Error("Username, email, mylanguage fields are compulsory!");
+      }
+
+      const newUser = new FacebookUser({
+        username,
+        email,
+        myLanguage,
+        level: "Beginner",
+      });
+
+      await newUser.generateAuthToken();
+      await newUser.save();
+      newUser.password = undefined;
+      res.status(200).json({
+        status: "success",
+        message: "Signup successful!",
+        data: newUser,
+      });
+    }
   } catch (err) {
     res.status(400).json({ status: "error", message: err.message });
   }
@@ -352,4 +429,5 @@ module.exports = {
   resetPassword,
   logout,
   googleAuth,
+  facebookAuth
 };

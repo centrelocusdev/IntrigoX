@@ -1,6 +1,6 @@
 const express= require('express')
 const router = express.Router()
-const {login, register1,forgotPassword,resetPassword,logout, register2 , otpVerification , googleAuth} = require('../controllers/auth')
+const {login, register1,forgotPassword,resetPassword,logout, register2 , otpVerification , googleAuth , facebookAuth} = require('../controllers/auth')
 const authentication = require('../middleware/authentication');
 
 router.post('/register1', register1)
@@ -11,6 +11,7 @@ router.post('/otpVerify', otpVerification)
 router.post('/resetPassword', resetPassword)
 router.post('/logout', authentication.auth, logout)
 router.post('/googleAuth' , googleAuth )
+router.post('/facebookAuth' , facebookAuth);
 
 
 module.exports = router
