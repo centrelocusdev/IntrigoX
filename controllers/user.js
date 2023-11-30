@@ -76,7 +76,7 @@ const updateUserProfilePicture = async (req, res) => {
 const updateUserProfileWithS3 = async(req,res)=> {
   try{
     // console.log(req.file);
-    const user = req.user;
+    let user = req.user;
     if(!user){
       throw new Error("Authorization failed!");
     }
@@ -84,7 +84,7 @@ const updateUserProfileWithS3 = async(req,res)=> {
     if(!req.file.originalname){
       throw new Error('file is not present');
     }
-
+console.log(1);
   const updatedUser = await User.updateOne(
     { _id: user.id },
     {
@@ -93,6 +93,8 @@ const updateUserProfileWithS3 = async(req,res)=> {
       },
     }
   );
+ 
+  user = await User.findById({_id: user._id});
 
   let output;
   s3.listObjects({Bucket: process.env.BUCKET_PROFILE_PICTURE})
