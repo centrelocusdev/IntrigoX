@@ -8,7 +8,7 @@ const {
 } = require("../models/chapter");
 const Bonus = require("../models/bonus");
 const {
-  chapterData,
+  chaptersData,
   ParagraphsData,
   Question1Data,
   Question2Data,
@@ -95,13 +95,18 @@ exports.storeChaptersData = async (req, res) => {
       await NewParagraph.save();
       CollectionOfNewPara.push(NewParagraph);
     }
-    const newChapter = new Chapter(chapterData);
+    console.log(CollectionOfNewPara);
+    console.log(chaptersData);
+    const newChapter = new Chapter(chaptersData);
     await newChapter.save();
+    console.log(newChapter);
 
     for (let i = 0; i < CollectionOfNewPara.length; i++) {
       newChapter.paragraphs.push(CollectionOfNewPara[i]);
     }
     await newChapter.save();
+    console.log(newChapter);
+
     // console.log(newChapter);
     res.send("success");
   } catch (err) {

@@ -29,7 +29,13 @@ const questionSchema = new mongoose.Schema({
 
 const paragraphSchema = new mongoose.Schema({
   type: String,
-  para: String,
+  level: String,
+  para_english: String,
+  para_arabic: String,
+  para_chinese: String,
+  para_japanese: String,
+  para_portuguese: String,
+  para_spanish: String,
   pronounciationLessonAudio: String,  // This is present in one of the paragraphs
   questions: [questionSchema],
   obstacle_questions: [obstacleQuestionSchema],
@@ -38,6 +44,7 @@ const paragraphSchema = new mongoose.Schema({
 });
 
 const chapterSchema = new mongoose.Schema({
+  chapter: String,
   name: String,
   paragraphs: [paragraphSchema],
 });
