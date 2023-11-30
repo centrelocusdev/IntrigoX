@@ -94,12 +94,29 @@ const updateUserProfileWithS3 = async(req,res)=> {
     }
   );
 
-  // console.log(req.files);
-  
+  let output;
+  s3.listObjects({Bucket: process.env.BUCKET_PROFILE_PICTURE})
+  .promise()
+  .then(data => {
+    let baseurl = 'https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/'
+    output = data.Contents.filter(e => {return e.Key === user.avatar}).map(e=> baseurl + e.Key);
+    if(output.length<=0){
+      throw new Error("Image not found!");
+    }
     res.status(200).json({
       status: "success",
-      message: "Image has been updated successfully!"
+      message: "Image has been updated successfully!",
+      data: user,
+      image: output
+    });        
     })
+
+  // console.log(req.files);
+  
+    // res.status(200).json({
+    //   status: "success",
+    //   message: "Image has been updated successfully!"
+    // })
 
   }catch (err) {
     res.status(400).send({ status: "error", message: err.message });
