@@ -84,7 +84,7 @@ const updateUserProfileWithS3 = async(req,res)=> {
     if(!req.file.originalname){
       throw new Error('file is not present');
     }
-console.log(1);
+// console.log(1);
   const updatedUser = await User.updateOne(
     { _id: user.id },
     {

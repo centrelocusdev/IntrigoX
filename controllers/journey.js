@@ -95,17 +95,17 @@ exports.storeChaptersData = async (req, res) => {
       await NewParagraph.save();
       CollectionOfNewPara.push(NewParagraph);
     }
-    console.log(CollectionOfNewPara);
-    console.log(chaptersData);
+    // console.log(CollectionOfNewPara);
+    // console.log(chaptersData);
     const newChapter = new Chapter(chaptersData);
     await newChapter.save();
-    console.log(newChapter);
+    // console.log(newChapter);
 
     for (let i = 0; i < CollectionOfNewPara.length; i++) {
       newChapter.paragraphs.push(CollectionOfNewPara[i]);
     }
     await newChapter.save();
-    console.log(newChapter);
+    // console.log(newChapter);
 
     // console.log(newChapter);
     res.send("success");
