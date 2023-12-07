@@ -1,7 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const mongoose = require("mongoose");
 const User = require("../models/User");
-const GoogleUser = require("../models/GoogleUser");
 const FacebookUser = require("../models/FacebookUser");
 const UserRegistration = require("../models/UserRegistration");
 var bcrypt = require("bcryptjs");
@@ -154,6 +153,7 @@ const register2 = async (req, res) => {
       password: userData.password,
       myLanguage: userData.myLanguage,
       level: "Beginner",
+      authType: "Email"
     });
 
     await UserRegistration.deleteOne({ _id: userData.id });
@@ -180,15 +180,16 @@ const login = async (req, res) => {
     }
     const user = await User.findOne({ email });
     if (!user) throw new Error("User not found, please sign up first!");
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch)
+    if(user.authType !== 'Email'){
+      throw new Error("No account found, kindly register first!")
+    }
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch)
       throw new Error("Incorrect Password, Please write correct password");
-
     await user.generateAuthToken();
     await user.save();
     req.user = user;
-    user.password = "";
+    // user.password = "";
     res
       .status(200)
       .send({ status: "success", data: user, message: "Login successful!" });
@@ -318,57 +319,6 @@ const logout = async (req, res) => {
     res.status(400).json({ status: "error", message: err.message });
   }
 };
-// const googleAuth = async (req, res) => {
-//   try {
-//     const email = req.body.email;
-//     if (!email) {
-//       throw new Error("Email is compulsory!");
-//     }
-//     const isUserExist = await GoogleUser.findOne({ email: email });
-
-//     if (isUserExist) {
-//       // write login logic
-//       await isUserExist.generateAuthToken();
-//       await isUserExist.save();
-//       // req.user = user;
-//       isUserExist.password = "";
-//       res
-//         .status(200)
-//         .send({
-//           status: "success",
-//           data: isUserExist,
-//           message: "Login successful!",
-//         });
-//     } else {
-//       // write signup logic
-
-//       const username = req.body.username;
-//       const myLanguage = req.body.myLanguage;
-
-//       if (!username || !email || !myLanguage) {
-//         throw new Error("Username, email, mylanguage fields are compulsory!");
-//       }
-
-//       const newUser = new GoogleUser({
-//         username,
-//         email,
-//         myLanguage,
-//         level: "Beginner",
-//       });
-
-//       await newUser.generateAuthToken();
-//       await newUser.save();
-//       newUser.password = undefined;
-//       res.status(200).json({
-//         status: "success",
-//         message: "Signup successful!",
-//         data: newUser,
-//       });
-//     }
-//   } catch (err) {
-//     res.status(400).json({ status: "error", message: err.message });
-//   }
-// };
 
 const googleAuth = async (req, res) => {
   try {
@@ -388,7 +338,7 @@ const googleAuth = async (req, res) => {
     const avatar = googleUserData.picture;
 
     //check whether any user exist with this email id or not!
-    const isUserExist = await GoogleUser.findOne({ email: email });
+    const isUserExist = await User.findOne({ email: email });
     if (isUserExist) {
       //do login process
       await isUserExist.generateAuthToken();
@@ -415,12 +365,13 @@ const googleAuth = async (req, res) => {
       throw new Error("Invalid token!");
     }
 
-    const newUser = new GoogleUser({
+    const newUser = new User({
       username,
       email,
       myLanguage,
       level: "Beginner",
       avatar,
+      authType: "Google"
     });
 
     await newUser.generateAuthToken();

@@ -133,21 +133,30 @@ const userData = async (req, res)=> {
         if (!user) {
             throw new Error("Authrization failed!");
           }
-          let output;
-          s3.listObjects({Bucket: process.env.BUCKET_PROFILE_PICTURE})
-          .promise()
-          .then(data => {
-            let baseurl = 'https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/'
-            output = data.Contents.filter(e => {return e.Key === user.avatar}).map(e=> baseurl + e.Key);
-            if(output.length<=0){
-              throw new Error("Image not found!");
-            }
+          if(user.authType === 'Email'){
+            let output;
+            s3.listObjects({Bucket: process.env.BUCKET_PROFILE_PICTURE})
+            .promise()
+            .then(data => {
+              let baseurl = 'https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/'
+              output = data.Contents.filter(e => {return e.Key === user.avatar}).map(e=> baseurl + e.Key);
+              if(output.length<=0){
+                throw new Error("Image not found!");
+              }
+              res.status(200).json({
+                status: "success",
+                data: user,
+                image: output
+              });
+              })
+          }else if(user.authType === 'Google');{
             res.status(200).json({
               status: "success",
               data: user,
-              image: output
-            });        
-            })
+              image: user.avatar
+            });  
+          }
+          
          
 
     }catch (err) {
