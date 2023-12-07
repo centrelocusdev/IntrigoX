@@ -10,7 +10,8 @@ router.post('/forgotPassword',forgotPassword)
 router.post('/otpVerify', otpVerification)
 router.post('/resetPassword', resetPassword)
 router.post('/logout', authentication.auth, logout)
-router.post('/googleAuth' , googleAuth )
+router.post('/googleAuth' , googleAuth );
+
 router.post('/facebookAuth' , facebookAuth);
 
 

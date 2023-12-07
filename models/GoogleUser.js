@@ -21,7 +21,6 @@ const GoogleUserSchema = new mongoose.Schema({
     ],
     unique: true,
   },
-  
   token: String,
   level: String,
   myLanguage: String,

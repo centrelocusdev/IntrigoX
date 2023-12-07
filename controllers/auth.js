@@ -6,12 +6,12 @@ const FacebookUser = require('../models/FacebookUser');
 const UserRegistration = require("../models/UserRegistration");
 var bcrypt = require("bcryptjs");
 require("dotenv").config();
-const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const otpGenerator = require("otp-generator");
 const axios = require("axios");
-const { OAuth2Client } = require("google-auth-library");
 const fetch = require("node-fetch");
+const jwksClient = require('jwks-rsa');
+const jwt = require('jsonwebtoken');
 
 const OTP_CONFIG = {
   upperCaseAlphabets: false,
@@ -318,57 +318,127 @@ const logout = async (req, res) => {
     res.status(400).json({ status: "error", message: err.message });
   }
 };
-const googleAuth = async (req, res) => {
-  try {
-    const email = req.body.email;
-    if (!email) {
-      throw new Error("Email is compulsory!");
-    }
-    const isUserExist = await GoogleUser.findOne({ email: email });
+// const googleAuth = async (req, res) => {
+//   try {
+//     const email = req.body.email;
+//     if (!email) {
+//       throw new Error("Email is compulsory!");
+//     }
+//     const isUserExist = await GoogleUser.findOne({ email: email });
 
-    if (isUserExist) {
-      // write login logic
-      await isUserExist.generateAuthToken();
-      await isUserExist.save();
-      // req.user = user;
-      isUserExist.password = "";
-      res
-        .status(200)
-        .send({
-          status: "success",
-          data: isUserExist,
-          message: "Login successful!",
-        });
-    } else {
-      // write signup logic
+//     if (isUserExist) {
+//       // write login logic
+//       await isUserExist.generateAuthToken();
+//       await isUserExist.save();
+//       // req.user = user;
+//       isUserExist.password = "";
+//       res
+//         .status(200)
+//         .send({
+//           status: "success",
+//           data: isUserExist,
+//           message: "Login successful!",
+//         });
+//     } else {
+//       // write signup logic
 
-      const username = req.body.username;
-      const myLanguage = req.body.myLanguage;
+//       const username = req.body.username;
+//       const myLanguage = req.body.myLanguage;
 
-      if (!username || !email || !myLanguage) {
-        throw new Error("Username, email, mylanguage fields are compulsory!");
-      }
+//       if (!username || !email || !myLanguage) {
+//         throw new Error("Username, email, mylanguage fields are compulsory!");
+//       }
 
-      const newUser = new GoogleUser({
-        username,
-        email,
-        myLanguage,
-        level: "Beginner",
-      });
+//       const newUser = new GoogleUser({
+//         username,
+//         email,
+//         myLanguage,
+//         level: "Beginner",
+//       });
 
-      await newUser.generateAuthToken();
-      await newUser.save();
-      newUser.password = undefined;
-      res.status(200).json({
-        status: "success",
-        message: "Signup successful!",
-        data: newUser,
-      });
-    }
-  } catch (err) {
-    res.status(400).json({ status: "error", message: err.message });
+//       await newUser.generateAuthToken();
+//       await newUser.save();
+//       newUser.password = undefined;
+//       res.status(200).json({
+//         status: "success",
+//         message: "Signup successful!",
+//         data: newUser,
+//       });
+//     }
+//   } catch (err) {
+//     res.status(400).json({ status: "error", message: err.message });
+//   }
+// };
+const googleAuth = async (req, res)=> {
+try{
+ if(!req.headers.authorization){
+    throw new Error("Authorization failed!");
   }
-};
+  const accessToken = req.headers.authorization;  
+
+  //check if the token is already present in db or not
+  const isTokenPresent = await GoogleUser.findOne({token: accessToken});
+  console.log(isTokenPresent);
+  if(isTokenPresent){
+    // User is already exist!
+    // check whether the token is valid or not
+      const payload = jwt.verify(accessToken, process.env.JWT_SECRET)
+      const user = await GoogleUser.findById({_id: payload._id});
+      if(!user){throw new Error("Verification failed!")}
+
+      await user.generateAuthToken();
+      await user.save();
+      res
+      .status(200)
+      .send({ status: "success", data: user, message: "Sign In successful!" });
+  }else {
+    if(!req.body.myLanguage){
+      throw new Error("Kindly provide the User's native language!");
+    }
+    const myLanguage = req.body.myLanguage;
+  
+    const response = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${accessToken}`);
+    if(!response ||  !response.data){
+      throw new Error('Verification failed!');
+    }
+    const googleUserData = response.data;
+    
+  
+    const username = googleUserData.name;
+    const email = googleUserData.email;
+    const avatar = googleUserData.picture;
+    if (
+      googleUserData.iss !== 'https://accounts.google.com'  ||
+      Date.now() >= googleUserData.exp * 1000
+    ) {
+      throw new Error("Invalid token!");
+    }
+  
+    const newUser = new GoogleUser({
+      username,
+      email,
+      myLanguage,
+      level: "Beginner",
+      avatar,
+    });
+  
+    await newUser.generateAuthToken();
+    await newUser.save();
+    res
+    .status(200)
+    .send({ status: "success", data: newUser, message: "SignIn successful!" });
+
+  }
+
+ 
+}catch(err){
+  console.log(err);
+  res.status(400).json({
+    status: 'Error',
+    mesage: err.message
+  })
+}
+}
 const facebookAuth = async (req, res) => {
   try {
     const email = req.body.email;
@@ -429,5 +499,5 @@ module.exports = {
   resetPassword,
   logout,
   googleAuth,
-  facebookAuth
+  facebookAuth,
 };
