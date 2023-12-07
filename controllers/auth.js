@@ -78,11 +78,13 @@ const register1 = async (req, res) => {
       throw new Error(
         "Email, Password my language and username are compulsory fields!"
       );
+      return;
     }
     // If account with received email id already exists so return error message.
     const user = await User.findOne({ email });
     if (user) {
       throw new Error("User is already exist with the given email id!");
+      return;
     }
 
     const userWithOtp = await UserRegistration({ email });
@@ -335,12 +337,15 @@ const googleAuth = async (req, res) => {
     const googleUserData = response.data;
     const username = googleUserData.name;
     const email = googleUserData.email;
+    console.log(email);
     const avatar = googleUserData.picture;
 
     //check whether any user exist with this email id or not!
     const isUserExist = await User.findOne({ email: email });
+    console.log(isUserExist);
     if (isUserExist) {
       //do login process
+      console.log("in the exist");
       await isUserExist.generateAuthToken();
       await isUserExist.save();
       res
