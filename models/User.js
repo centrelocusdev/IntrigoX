@@ -27,6 +27,10 @@ const UserSchema = new mongoose.Schema({
     // required: [true, 'Please Provide Password'],
   },
   authType: String,
+  isImageUpdated: {
+    type: Boolean,
+    default: false
+  },
   token: String,
   otp: String,
   level: String,
