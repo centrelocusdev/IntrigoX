@@ -82,8 +82,11 @@ const register1 = async (req, res) => {
     }
     // If account with received email id already exists so return error message.
     const user = await User.findOne({ email });
-    if (user) {
+    if (user && user.authType === "Email") {
       throw new Error("User is already exist with the given email id!");
+      return;
+    }else if(user && user.authType !== "Email"){
+      throw new Error("Someone else is using this email!");
       return;
     }
 
