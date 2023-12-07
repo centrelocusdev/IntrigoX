@@ -342,10 +342,10 @@ const googleAuth = async (req, res) => {
 
     //check whether any user exist with this email id or not!
     const isUserExist = await User.findOne({ email: email });
-    console.log(isUserExist);
+    // console.log(isUserExist);
     if (isUserExist) {
       //do login process
-      console.log("in the exist");
+      // console.log("in the exist");
       await isUserExist.generateAuthToken();
       await isUserExist.save();
       res
