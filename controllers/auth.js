@@ -418,56 +418,8 @@ const googleAuth = async (req, res) => {
     });
   }
 };
+
 const facebookAuth = async (req, res) => {
-  try {
-    const email = req.body.email;
-    if (!email) {
-      throw new Error("Email is compulsory!");
-    }
-    const isUserExist = await FacebookUser.findOne({ email: email });
-
-    if (isUserExist) {
-      // write login logic
-      await isUserExist.generateAuthToken();
-      await isUserExist.save();
-      // req.user = user;
-      isUserExist.password = "";
-      res.status(200).send({
-        status: "success",
-        data: isUserExist,
-        message: "Login successful!",
-      });
-    } else {
-      // write signup logic
-
-      const username = req.body.username;
-      const myLanguage = req.body.myLanguage;
-
-      if (!username || !email || !myLanguage) {
-        throw new Error("Username, email, mylanguage fields are compulsory!");
-      }
-
-      const newUser = new FacebookUser({
-        username,
-        email,
-        myLanguage,
-        level: "Beginner",
-      });
-
-      await newUser.generateAuthToken();
-      await newUser.save();
-      newUser.password = undefined;
-      res.status(200).json({
-        status: "success",
-        message: "Signup successful!",
-        data: newUser,
-      });
-    }
-  } catch (err) {
-    res.status(400).json({ status: "error", message: err.message });
-  }
-};
-const facebookAuth2 = async (req, res) => {
   if (!req.headers.authorization) {
     throw new Error("Authorization failed!");
   }
@@ -535,5 +487,4 @@ module.exports = {
   logout,
   googleAuth,
   facebookAuth,
-  facebookAuth2,
 };
