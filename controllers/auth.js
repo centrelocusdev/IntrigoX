@@ -170,6 +170,7 @@ const register2 = async (req, res) => {
       status: "success",
       message: "Signup successful!",
       data: newUser,
+      image:[ `https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/${newUser.avatar}`]
     });
   } catch (err) {
     res.status(400).send({ status: "error", message: err.message });
@@ -197,7 +198,13 @@ const login = async (req, res) => {
     // user.password = "";
     res
       .status(200)
-      .send({ status: "success", data: user, message: "Login successful!" });
+      .send(
+        { 
+          status: "success",
+           data: user,
+            message: "Login successful!",
+            image: [`https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/${user.avatar}`]
+       });
   } catch (err) {
     res.status(400).send({ status: "error", message: err.message });
   }
@@ -390,6 +397,7 @@ const googleAuth = async (req, res) => {
         status: "success",
         data: newUser,
         message: "SignIn successful!",
+        image:[newUser.avatar]
       });
   } catch (err) {
     console.log(err);
