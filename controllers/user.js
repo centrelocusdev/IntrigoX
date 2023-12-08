@@ -172,7 +172,7 @@ const userData = async (req, res) => {
       res.status(200).json({
         status: "success",
         data: user,
-        image: user.avatar,
+        image: [user.avatar],
       });
     }
   } catch (err) {

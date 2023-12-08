@@ -85,7 +85,7 @@ const register1 = async (req, res) => {
     if (user && user.authType === "Email") {
       throw new Error("User is already exist with the given email id!");
       return;
-    }else if(user && user.authType !== "Email"){
+    } else if (user && user.authType !== "Email") {
       throw new Error("Someone else is using this email!");
       return;
     }
@@ -158,7 +158,7 @@ const register2 = async (req, res) => {
       password: userData.password,
       myLanguage: userData.myLanguage,
       level: "Beginner",
-      authType: "Email"
+      authType: "Email",
     });
 
     await UserRegistration.deleteOne({ _id: userData.id });
@@ -170,7 +170,9 @@ const register2 = async (req, res) => {
       status: "success",
       message: "Signup successful!",
       data: newUser,
-      image:[ `https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/${newUser.avatar}`]
+      image: [
+        `https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/${newUser.avatar}`,
+      ],
     });
   } catch (err) {
     res.status(400).send({ status: "error", message: err.message });
@@ -186,25 +188,24 @@ const login = async (req, res) => {
     }
     const user = await User.findOne({ email });
     if (!user) throw new Error("User not found, please sign up first!");
-    if(user.authType !== 'Email'){
-      throw new Error("No account found, kindly register first!")
+    if (user.authType !== "Email") {
+      throw new Error("No account found, kindly register first!");
     }
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch)
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch)
       throw new Error("Incorrect Password, Please write correct password");
     await user.generateAuthToken();
     await user.save();
     req.user = user;
     // user.password = "";
-    res
-      .status(200)
-      .send(
-        { 
-          status: "success",
-           data: user,
-            message: "Login successful!",
-            image: [`https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/${user.avatar}`]
-       });
+    res.status(200).send({
+      status: "success",
+      data: user,
+      message: "Login successful!",
+      image: [
+        `https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/${user.avatar}`,
+      ],
+    });
   } catch (err) {
     res.status(400).send({ status: "error", message: err.message });
   }
@@ -353,18 +354,30 @@ const googleAuth = async (req, res) => {
     //check whether any user exist with this email id or not!
     const isUserExist = await User.findOne({ email: email });
     // console.log(isUserExist);
-    if (isUserExist) {
+    if (isUserExist && isUserExist.authType === "Email") {
       //do login process
       // console.log("in the exist");
       await isUserExist.generateAuthToken();
       await isUserExist.save();
-      res
-        .status(200)
-        .send({
-          status: "success",
-          data: isUserExist,
-          message: "Sign In successful!",
-        });
+      res.status(200).json({
+        status: "success",
+        data: isUserExist,
+        message: "Sign In successful!",
+        image: [
+          `https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/${isUserExist.avatar}`,
+        ],
+      });
+      return;
+    } else {
+      //do login process
+      // console.log("in the exist");
+      await isUserExist.generateAuthToken();
+      await isUserExist.save();
+      res.status(200).json({
+        status: "success",
+        data: isUserExist,
+        message: "Sign In successful!",
+      });
       return;
     }
 
@@ -386,19 +399,17 @@ const googleAuth = async (req, res) => {
       myLanguage,
       level: "Beginner",
       avatar,
-      authType: "Google"
+      authType: "Google",
     });
 
     await newUser.generateAuthToken();
     await newUser.save();
-    res
-      .status(200)
-      .send({
-        status: "success",
-        data: newUser,
-        message: "SignIn successful!",
-        image:[newUser.avatar]
-      });
+    res.status(200).send({
+      status: "success",
+      data: newUser,
+      message: "SignIn successful!",
+      image: [newUser.avatar],
+    });
   } catch (err) {
     console.log(err);
     res.status(400).json({
@@ -456,6 +467,64 @@ const facebookAuth = async (req, res) => {
     res.status(400).json({ status: "error", message: err.message });
   }
 };
+const facebookAuth2 = async (req, res) => {
+  if (!req.headers.authorization) {
+    throw new Error("Authorization failed!");
+  }
+  const accessToken = req.headers.authorization;
+  try {
+    const fields = "id,name,email,picture";
+    const check = await axios.get(
+      `https://graph.facebook.com/me?fields=${fields}&access_token=${accessToken}`
+    );
+    const userData = check.data;
+    const facebookId = userData.id;
+    const username = userData.name;
+    const avatar = userData.picture.data.url;
+
+    //check whether any user exist with this facebook id or not!
+    const isUserExist = await User.findOne({ facebookId: facebookId });
+    // console.log(isUserExist);
+    if (isUserExist) {
+      //do login process
+      // console.log("in the exist");
+      await isUserExist.generateAuthToken();
+      await isUserExist.save();
+      res.status(200).send({
+        status: "success",
+        data: isUserExist,
+        image: [isUserExist.avatar],
+        message: "Sign In successful!",
+      });
+      return;
+    }
+
+    if (!req.body.myLanguage) {
+      throw new Error("Kindly provide the User's native language!");
+    }
+    const myLanguage = req.body.myLanguage;
+
+    const newUser = new User({
+      username,
+      myLanguage,
+      level: "Beginner",
+      avatar,
+      authType: "Facebook",
+      facebookId,
+    });
+
+    await newUser.generateAuthToken();
+    await newUser.save();
+    res.status(200).send({
+      status: "success",
+      data: newUser,
+      message: "SignIn successful!",
+      image: [newUser.avatar],
+    });
+  } catch (err) {
+    res.status(400).json({ status: "error", message: err.message });
+  }
+};
 module.exports = {
   register1,
   register2,
@@ -466,4 +535,5 @@ module.exports = {
   logout,
   googleAuth,
   facebookAuth,
+  facebookAuth2,
 };
