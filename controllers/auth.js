@@ -362,7 +362,7 @@ const googleAuth = async (req, res) => {
         await isUserExist.save();
         data = isUserExist;
         image = [`https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/${isUserExist.avatar}`];
-      }else if(isUserExist.isImageUpdated === false){
+      }else if(isUserExist.authType !== "Email" && isUserExist.isImageUpdated === false){
         await isUserExist.generateAuthToken();
         await isUserExist.save();
         data = isUserExist;

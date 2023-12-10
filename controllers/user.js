@@ -148,8 +148,9 @@ const userData = async (req, res) => {
     if (!user) {
       throw new Error("Authrization failed!");
     }
+    let output;
+    let data;
     if (user.authType === "Email" || user.isImageUpdated === true) {
-      let output;
       s3.listObjects({ Bucket: process.env.BUCKET_PROFILE_PICTURE })
         .promise()
         .then((data) => {
@@ -161,20 +162,24 @@ const userData = async (req, res) => {
           if (output.length <= 0) {
             throw new Error("Image not found!");
           }
-          res.status(200).json({
-            status: "success",
-            data: user,
-            image: output,
-          });
+          data = user;
+
+          // res.status(200).json({
+          //   status: "success",
+          //   data: user,
+          //   image: output,
+          // });
         });
-    } else if (user.isImageUpdated === false);
+    } else if (isUserExist.authType !== "Email" && user.isImageUpdated === false);
     {
-      res.status(200).json({
-        status: "success",
-        data: user,
-        image: [user.avatar],
-      });
+      data = user;
+      output = [user.avatar];
     }
+    res.status(200).json({
+      status: "success",
+      data: data,
+      image: output,
+    });
   } catch (err) {
     res.status(400).send({ status: "error", message: err.message });
   }
