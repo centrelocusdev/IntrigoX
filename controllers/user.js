@@ -169,9 +169,9 @@ const userData = async (req, res) => {
           data = user;
           console.log(output);
         } else if (user.authType !== "Email" && user.isImageUpdated === false) {
-          console.log(
-            user.authType !== "Email" && user.isImageUpdated === false
-          );
+          // console.log(
+          //   user.authType !== "Email" && user.isImageUpdated === false
+          // );
           data = user;
           output = [user.avatar];
         }
