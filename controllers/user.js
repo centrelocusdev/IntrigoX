@@ -152,12 +152,12 @@ const userData = async (req, res) => {
     let output;
     let data;
 
-    console.log(1);
+    // console.log(1);
     s3.listObjects({ Bucket: process.env.BUCKET_PROFILE_PICTURE })
       .promise()
       .then((data) => {
         if (user.authType === "Email" || user.isImageUpdated === true) {
-          console.log(2);
+          // console.log(2);
           let baseurl =
             "https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/";
           output = data.Contents.filter((e) => {
@@ -175,7 +175,7 @@ const userData = async (req, res) => {
           data = user;
           output = [user.avatar];
         }
-        console.log(output, "final");
+        // console.log(output, "final");
         res.status(200).json({
           status: "success",
           data: data,
