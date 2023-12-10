@@ -109,6 +109,7 @@ const updateUserProfileWithS3 = async (req, res) => {
         }
       );
     }
+    user = await User.findById({ _id: user._id });
 
     let output;
     s3.listObjects({ Bucket: process.env.BUCKET_PROFILE_PICTURE })
@@ -150,10 +151,13 @@ const userData = async (req, res) => {
     }
     let output;
     let data;
-    if (user.authType === "Email" || user.isImageUpdated === true) {
-      s3.listObjects({ Bucket: process.env.BUCKET_PROFILE_PICTURE })
-        .promise()
-        .then((data) => {
+
+    console.log(1);
+    s3.listObjects({ Bucket: process.env.BUCKET_PROFILE_PICTURE })
+      .promise()
+      .then((data) => {
+        if (user.authType === "Email" || user.isImageUpdated === true) {
+          console.log(2);
           let baseurl =
             "https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/";
           output = data.Contents.filter((e) => {
@@ -163,23 +167,23 @@ const userData = async (req, res) => {
             throw new Error("Image not found!");
           }
           data = user;
-
-          // res.status(200).json({
-          //   status: "success",
-          //   data: user,
-          //   image: output,
-          // });
+          console.log(output);
+        } else if (user.authType !== "Email" && user.isImageUpdated === false) {
+          console.log(
+            user.authType !== "Email" && user.isImageUpdated === false
+          );
+          data = user;
+          output = [user.avatar];
+        }
+        console.log(output, "final");
+        res.status(200).json({
+          status: "success",
+          data: data,
+          image: output,
         });
-    } else if (isUserExist.authType !== "Email" && user.isImageUpdated === false);
-    {
-      data = user;
-      output = [user.avatar];
-    }
-    res.status(200).json({
-      status: "success",
-      data: data,
-      image: output,
-    });
+      });
+
+   
   } catch (err) {
     res.status(400).send({ status: "error", message: err.message });
   }
