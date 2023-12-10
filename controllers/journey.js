@@ -49,6 +49,7 @@ exports.languageConvert = async (req, res) => {
 
 exports.getChaptersData = async (req, res) => {
   try {
+    console.log("in the chapters controller");
     const getChapter = await Chapter.find({});
     const newChapter = util.inspect(getChapter, {
       depth: null,

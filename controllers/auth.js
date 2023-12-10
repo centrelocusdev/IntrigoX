@@ -354,61 +354,67 @@ const googleAuth = async (req, res) => {
     //check whether any user exist with this email id or not!
     const isUserExist = await User.findOne({ email: email });
     // console.log(isUserExist);
-    if (isUserExist && isUserExist.authType === "Email") {
+    let data;
+    let image;
+    if (isUserExist ) {
+      if(isUserExist.authType === "Email" || isUserExist.isImageUpdated === true){
+        await isUserExist.generateAuthToken();
+        await isUserExist.save();
+        data = isUserExist;
+        image = [`https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/${isUserExist.avatar}`];
+      }else if(isUserExist.isImageUpdated === false){
+        await isUserExist.generateAuthToken();
+        await isUserExist.save();
+        data = isUserExist;
+        image = [isUserExist.avatar];
+      }
       //do login process
       // console.log("in the exist");
-      await isUserExist.generateAuthToken();
-      await isUserExist.save();
-      res.status(200).json({
-        status: "success",
-        data: isUserExist,
-        message: "Sign In successful!",
-        image: [
-          `https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/${isUserExist.avatar}`,
-        ],
+      
+
+      // res.status(200).json({
+      //   status: "success",
+      //   data: isUserExist,
+      //   message: "Sign In successful!",
+      //   image: [
+      //     `https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/${isUserExist.avatar}`,
+      //   ],
+      // });
+      // return;
+    }else {
+      if (!req.body.myLanguage) {
+        throw new Error("Kindly provide the User's native language!");
+      }
+      const myLanguage = req.body.myLanguage;
+  
+      if (
+        googleUserData.iss !== "https://accounts.google.com" ||
+        Date.now() >= googleUserData.exp * 1000
+      ) {
+        throw new Error("Invalid token!");
+      }
+  
+      const newUser = new User({
+        username,
+        email,
+        myLanguage,
+        level: "Beginner",
+        avatar,
+        authType: "Google",
       });
-      return;
-    } else {
-      //do login process
-      // console.log("in the exist");
-      await isUserExist.generateAuthToken();
-      await isUserExist.save();
-      res.status(200).json({
-        status: "success",
-        data: isUserExist,
-        message: "Sign In successful!",
-      });
-      return;
+  
+      await newUser.generateAuthToken();
+      await newUser.save();
+      data = newUser;
+      image = [newUser.avatar];
     }
 
-    if (!req.body.myLanguage) {
-      throw new Error("Kindly provide the User's native language!");
-    }
-    const myLanguage = req.body.myLanguage;
-
-    if (
-      googleUserData.iss !== "https://accounts.google.com" ||
-      Date.now() >= googleUserData.exp * 1000
-    ) {
-      throw new Error("Invalid token!");
-    }
-
-    const newUser = new User({
-      username,
-      email,
-      myLanguage,
-      level: "Beginner",
-      avatar,
-      authType: "Google",
-    });
-
-    await newUser.generateAuthToken();
-    await newUser.save();
+    
     res.status(200).send({
       status: "success",
-      data: newUser,
+      data: data,
       message: "SignIn successful!",
-      image: [newUser.avatar],
+      image: image,
     });
   } catch (err) {
     console.log(err);
@@ -437,41 +443,53 @@ const facebookAuth = async (req, res) => {
     //check whether any user exist with this facebook id or not!
     const isUserExist = await User.findOne({ facebookId: facebookId });
     // console.log(isUserExist);
+    let data;
+    let image;
     if (isUserExist) {
+      await isUserExist.generateAuthToken();
+        await isUserExist.save();
+        data = isUserExist;
+      if(isUserExist.isImageUpdated === false){        
+        image = [isUserExist.avatar];
+      }else {
+        image = [`https://intrigox-userprofilepictures.s3.ap-south-1.amazonaws.com/${isUserExist.avatar}`];
+      }
       //do login process
       // console.log("in the exist");
-      await isUserExist.generateAuthToken();
-      await isUserExist.save();
-      res.status(200).send({
-        status: "success",
-        data: isUserExist,
-        image: [isUserExist.avatar],
-        message: "Sign In successful!",
+      
+      // res.status(200).send({
+      //   status: "success",
+      //   data: isUserExist,
+      //   image: [isUserExist.avatar],
+      //   message: "Sign In successful!",
+      // });
+      // return;
+    }else {
+      if (!req.body.myLanguage) {
+        throw new Error("Kindly provide the User's native language!");
+      }
+      const myLanguage = req.body.myLanguage;
+  
+      const newUser = new User({
+        username,
+        myLanguage,
+        level: "Beginner",
+        avatar,
+        authType: "Facebook",
+        facebookId,
       });
-      return;
+  
+      await newUser.generateAuthToken();
+      await newUser.save();
+      data = newUser;
+      image = [newUser.avatar];
     }
 
-    if (!req.body.myLanguage) {
-      throw new Error("Kindly provide the User's native language!");
-    }
-    const myLanguage = req.body.myLanguage;
-
-    const newUser = new User({
-      username,
-      myLanguage,
-      level: "Beginner",
-      avatar,
-      authType: "Facebook",
-      facebookId,
-    });
-
-    await newUser.generateAuthToken();
-    await newUser.save();
     res.status(200).send({
       status: "success",
-      data: newUser,
+      data: data,
       message: "SignIn successful!",
-      image: [newUser.avatar],
+      image: image,
     });
   } catch (err) {
     res.status(400).json({ status: "error", message: err.message });
